@@ -1,0 +1,293 @@
+<html>
+
+<head>
+    <title>Inter(Persona, Space);</title>
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+        {
+        "imports": {
+            "three": "https://unpkg.com/three@<version>/build/three.module.js"
+        }
+        }
+    </script>
+    <style>
+        @import url(//fonts.googleapis.com/earlyaccess/jejumyeongjo.css);
+
+        #info {
+            position: absolute;
+            top: 400px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: block;
+            color: aliceblue;
+            font-family: 'jejumyeongjo';
+            font-size: 20pt;
+        }
+    </style>
+</head>
+
+<body style="overflow: hidden; margin: 0%;">
+    <div id="info">//공간은 객체가 있어야 인지할 수 있습니다.<br><br>inter(persona, space);</div>
+    <script>
+        import * as THREE from 'three';
+        // Set up the scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create the materials and geometries for the torus shapes
+        const material = new THREE.MeshNormalMaterial({ transparent: true, opacity: 0.1 });
+
+        const cylinderGeometry = new THREE.CylinderGeometry(50, 80, 10, 40, 40, true);
+        const cylinderGeometry1 = new THREE.CylinderGeometry(50, 50, 10, 40, 40, true);
+        const cylinderGeometry2 = new THREE.CylinderGeometry(50, 50, 10, 40, 40, true);
+
+
+        const torusGeometry = new THREE.TorusGeometry(500, 5, 16, 100);
+        const torusGeometry1 = new THREE.TorusGeometry(150, 5, 16, 100);
+        const torusGeometry2 = new THREE.TorusGeometry(100, 5, 16, 100);
+
+        //const axisHelper = new THREE.AxesHelper(1000);
+        //scene.add(axisHelper);
+
+        // Initialize the torus rotation angle
+        let angle = 0;
+        let angle1 = 0;
+        let angle2 = 0;
+
+        let angleC = 0;
+        let angleC1 = Math.PI / 4;
+        let angleC2 = - Math.PI / 4;
+
+        let posC = -100;
+        let posC1 = -100;
+        let posC2 = 100;
+
+        let cylinderCount = 0;
+        let torusCount = 0;
+
+        // Flag to track whether the mouse is pressed down
+        let isMouseDown = false;
+
+        // Set a timer to fade out the scene and refresh the page if the mouse isn't pressed for 20 seconds
+        let timer = setTimeout(() => {
+            fadeOutAndReload();
+        }, 20000);
+
+        // Start the timer again if the mouse is pressed down
+        renderer.domElement.addEventListener('mousedown', () => {
+            isMouseDown = true;
+            clearTimeout(timer);
+        });
+
+        // Stop the timer if the mouse is released
+        renderer.domElement.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            timer = setTimeout(() => {
+                fadeOutAndReload();
+            }, 20000);
+        });
+
+        // Define fadeOutAndReload function
+        function fadeOutAndReload() {
+            // Set up animation loop
+            const start = Date.now();
+            const duration = 2000; // in milliseconds
+            const animate = () => {
+                const elapsed = Date.now() - start;
+                const progress = elapsed / duration;
+                if (progress >= 1) {
+                    // Opacity has reached 0, so reload the page
+                    location.reload(location.href);
+                } else {
+                    // Update opacity
+                    renderer.domElement.style.opacity = 1 - progress;
+                    // Request next frame
+                    requestAnimationFrame(animate);
+                }
+            };
+            // Start animation loop
+            requestAnimationFrame(animate);
+        }
+
+        renderer.domElement.addEventListener('mousemove', (event) => {
+            // Calculate the normalized mouse position, where (-1, -1) is bottom left and (1, 1) is top right
+            const mouseX = -(event.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // Set the camera rotation based on the mouse position
+            camera.rotation.y = mouseX * Math.PI;
+            camera.rotation.x = mouseY * Math.PI;
+        });
+
+        // Generate a torus shape when the mouse is pressed down
+        function generateCylinder() {
+            if (cylinderCount >= 600) {
+                return;
+            }
+            // Use a fixed position for the new torus shape
+            const positionC = new THREE.Vector3(-150, posC, -100);
+            const positionC1 = new THREE.Vector3(posC1, posC1, posC1);
+            const positionC2 = new THREE.Vector3(posC2, -200, 100);
+            const rotation = new THREE.Euler(angleC, angleC, angleC, 'XYZ');
+            const rotation1 = new THREE.Euler(angleC1, angleC1, angleC1, 'XYZ');
+            const rotation2 = new THREE.Euler(angleC2, angleC2, angleC2, 'XYZ');
+
+
+            // Create the torus shape and add it to the scene
+            const cylinder = new THREE.Mesh(cylinderGeometry, material);
+            cylinder.position.copy(positionC);
+            cylinder.rotation.copy(rotation);
+            scene.add(cylinder);
+
+            const cylinder1 = new THREE.Mesh(cylinderGeometry1, material);
+            cylinder1.position.copy(positionC1);
+            cylinder1.rotation.copy(rotation1);
+            scene.add(cylinder1);
+
+            const cylinder2 = new THREE.Mesh(cylinderGeometry2, material);
+            cylinder2.position.copy(positionC2);
+            cylinder2.rotation.copy(rotation2);
+            scene.add(cylinder2);
+
+            posC += Math.random() * Math.PI
+            posC1 += Math.random() * Math.PI
+            posC2 += Math.random() * Math.PI
+
+            cylinderCount++;
+        }
+
+        function generateTorus() {
+            if (torusCount >= 400) {
+                return;
+            }
+            // Use a fixed position for the new torus shape
+            const position = new THREE.Vector3(0, 0, 0);
+            const position1 = new THREE.Vector3(100, 100, 0);
+            const position2 = new THREE.Vector3(100, 400, -100);
+
+            const rotation = new THREE.Euler(angle, angle, angle, 'XYZ');
+            const rotation1 = new THREE.Euler(angle1, angle1, angle1, 'XYZ');
+            const rotation2 = new THREE.Euler(angle2, angle2, angle2, 'XYZ');
+
+
+            // Create the torus shape and add it to the scene
+            const torus = new THREE.Mesh(torusGeometry, material);
+            torus.position.copy(position);
+            torus.rotation.copy(rotation);
+            scene.add(torus);
+
+            const torus1 = new THREE.Mesh(torusGeometry1, material);
+            torus1.position.copy(position1);
+            torus1.rotation.copy(rotation1);
+            scene.add(torus1);
+
+            const torus2 = new THREE.Mesh(torusGeometry2, material);
+            torus2.position.copy(position2);
+            torus2.rotation.copy(rotation2);
+            scene.add(torus2);
+
+            // Increment the torus rotation angle for the next torus shape
+            angle += Math.random() * Math.PI / 100;
+            angle1 += Math.random() * Math.PI / 100;
+            angle2 += Math.random() * Math.PI / 100;
+
+            torusCount++;
+
+        }
+
+        var updateCylinderSurface = () => {
+            // Increment clickCount
+            var time = Date.now() * 0.01;
+
+            // Loop through sphereGeometry vertices
+            for (var i = 0; i < cylinderGeometry.attributes.position.array.length; i += 3) {
+                // Apply noise to sphereGeometry vertices
+                cylinderGeometry.attributes.position.array[i] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);
+                cylinderGeometry.attributes.position.array[i + 1] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+                cylinderGeometry.attributes.position.array[i + 2] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+            }
+
+            for (var i = 0; i < cylinderGeometry1.attributes.position.array.length; i += 3) {
+                // Apply noise to sphereGeometry vertices
+                cylinderGeometry1.attributes.position.array[i] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);
+                cylinderGeometry1.attributes.position.array[i + 1] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+                cylinderGeometry1.attributes.position.array[i + 2] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+            }
+
+            // Update sphereGeometry
+            cylinderGeometry.attributes.position.needsUpdate = true;
+            cylinderGeometry1.attributes.position.needsUpdate = true;
+            // planeGeometry.attributes.position.needsUpdate = true;
+        };
+
+        // Function to update sphere surface
+        var updateTorusSurface = () => {
+            // Increment clickCount
+            var time = Date.now() * 0.01;
+
+            // Loop through sphereGeometry vertices
+            for (var i = 0; i < torusGeometry.attributes.position.array.length; i += 3) {
+                // Apply noise to sphereGeometry vertices
+                torusGeometry.attributes.position.array[i] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);
+                torusGeometry.attributes.position.array[i + 1] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+                torusGeometry.attributes.position.array[i + 2] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+            }
+
+            for (var i = 0; i < torusGeometry1.attributes.position.array.length; i += 3) {
+                // Apply noise to sphereGeometry vertices
+                torusGeometry1.attributes.position.array[i] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);
+                torusGeometry1.attributes.position.array[i + 1] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+                torusGeometry1.attributes.position.array[i + 2] += (Math.random() - 0.5) * 0.2 * Math.sin(time * 0.0125);;
+            }
+
+            // Update sphereGeometry
+            torusGeometry.attributes.position.needsUpdate = true;
+            torusGeometry1.attributes.position.needsUpdate = true;
+            // planeGeometry.attributes.position.needsUpdate = true;
+        };
+
+
+
+        // Add event listeners to the renderer to generate torus shapes while the mouse is pressed down
+        renderer.domElement.addEventListener('mousedown', () => {
+            isMouseDown = true;
+        });
+        renderer.domElement.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        // Render the scene
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            updateTorusSurface();
+            updateCylinderSurface();
+            // fpControls.update(1.0);
+            // Generate torus shapes while the mouse is pressed down
+            if (isMouseDown) {
+                generateTorus();
+                generateCylinder();
+            }
+        }
+        animate();
+
+        renderer.domElement.addEventListener('mousedown', () => {
+            descriptionText();
+        });
+
+        function descriptionText() {
+            const description = document.getElementById("info")
+            description.style.display = "none";
+        }
+        // Position the camera
+        camera.position.set(Math.random() * 400, Math.random() * 400, Math.random() * 400);
+        camera.rotation.set(0, 0, 0);
+    </script>
+</body>
+
+</html>
