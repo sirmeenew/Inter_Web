@@ -2,7 +2,15 @@
 
 <head>
     <title>Inter(Persona, Space);</title>
-    <script src="../build/three.min.js"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+        {
+        "imports": {
+            "three": "https://unpkg.com/three@<version>/build/three.module.js"
+        }
+        }
+    </script>
     <style>
         @import url(//fonts.googleapis.com/earlyaccess/jejumyeongjo.css);
 
@@ -23,7 +31,7 @@
 <body style="overflow: hidden; margin: 0%;">
     <div id="info">//공간은 객체가 있어야 인지할 수 있습니다.<br><br>inter(persona, space);</div>
     <script>
-
+        import * as THREE from 'three';
         // Set up the scene
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
